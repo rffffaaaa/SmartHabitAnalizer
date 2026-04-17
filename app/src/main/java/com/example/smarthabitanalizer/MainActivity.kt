@@ -3,15 +3,13 @@ package com.example.smarthabitanalizer
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.example.smarthabitanalizer.ui.theme.SmartHabitAnalizerTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Card
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.painterResource
 
 class MainActivity : ComponentActivity() {
 
@@ -19,17 +17,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            SmartHabitAnalizerTheme {
-                HabitScreen()
-            }
+            SmartHabitUI()
         }
     }
 }
 
 @Composable
-fun HabitScreen() {
+fun SmartHabitUI() {
 
-    val habits = HabitSource.dummyHabit
+    var habits by remember { mutableStateOf(HabitSource.dummyHabit) }
+    var newHabit by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -37,30 +34,95 @@ fun HabitScreen() {
             .padding(16.dp)
     ) {
 
-        habits.forEach { habit ->
+        OutlinedTextField(
+            value = newHabit,
+            onValueChange = { newHabit = it },
+            label = { Text("Tambah Habit") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                if (newHabit.isNotBlank()) {
+                    habits = habits + Habit(
+                        nama = newHabit,
+                        deskripsi = "Custom Habit",
+                        durasi = "10 menit",
+                        imageRes = R.drawable.olahraga,
+                        isDone = false
+                    )
+                    newHabit = ""
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Tambah")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        habits.forEachIndexed { index, habit ->
 
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+                    .padding(vertical = 6.dp)
             ) {
 
-                Row(
-                    modifier = Modifier.padding(12.dp)
-                ) {
+                Column(modifier = Modifier.padding(12.dp)) {
 
-                    Image(
-                        painter = painterResource(id = habit.imageRes),
-                        contentDescription = habit.nama,
-                        modifier = Modifier.size(80.dp)
-                    )
+                    Row {
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                        Image(
+                            painter = painterResource(id = habit.imageRes),
+                            contentDescription = habit.nama,
+                            modifier = Modifier.size(60.dp)
+                        )
 
-                    Column {
-                        Text(text = habit.nama)
-                        Text(text = habit.deskripsi)
-                        Text(text = "Durasi: ${habit.durasi}")
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column {
+                            Text(
+                                text = habit.nama,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(text = habit.deskripsi)
+                            Text(text = "Durasi: ${habit.durasi}")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(if (habit.isDone) "Selesai" else "Belum Selesai")
+
+                        Switch(
+                            checked = habit.isDone,
+                            onCheckedChange = { newValue ->
+                                val updatedList = habits.toMutableList()
+                                updatedList[index] =
+                                    updatedList[index].copy(isDone = newValue)
+                                habits = updatedList
+                            }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = {
+                            val updatedList = habits.toMutableList()
+                            updatedList[index] =
+                                updatedList[index].copy(isDone = !habit.isDone)
+                            habits = updatedList
+                        }
+                    ) {
+                        Text("Toggle Status")
                     }
                 }
             }
