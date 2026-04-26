@@ -4,12 +4,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 
 class MainActivity : ComponentActivity() {
 
@@ -27,6 +31,13 @@ fun SmartHabitUI() {
 
     var habits by remember { mutableStateOf(HabitSource.dummyHabit) }
     var newHabit by remember { mutableStateOf("") }
+    var showCompletedOnly by remember { mutableStateOf(false) }
+
+    val filteredHabits = if (showCompletedOnly) {
+        habits.filter { it.isDone }
+    } else {
+        habits
+    }
 
     Column(
         modifier = Modifier
@@ -61,68 +72,98 @@ fun SmartHabitUI() {
             Text("Tambah")
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = { showCompletedOnly = !showCompletedOnly },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(if (showCompletedOnly) "Tampilkan Semua" else "Hanya Selesai")
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
-        habits.forEachIndexed { index, habit ->
+        LazyColumn {
 
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 6.dp)
-            ) {
+            itemsIndexed(filteredHabits) { _, habit ->
 
-                Column(modifier = Modifier.padding(12.dp)) {
+                val bgColor = if (habit.isDone) Color(0xFF1B5E20) else Color(0xFF2C2C2C)
 
-                    Row {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp)
+                ) {
 
-                        Image(
-                            painter = painterResource(id = habit.imageRes),
-                            contentDescription = habit.nama,
-                            modifier = Modifier.size(60.dp)
-                        )
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Column {
-                            Text(
-                                text = habit.nama,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(text = habit.deskripsi)
-                            Text(text = "Durasi: ${habit.durasi}")
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    Column(
+                        modifier = Modifier
+                            .background(bgColor)
+                            .padding(12.dp)
                     ) {
-                        Text(if (habit.isDone) "Selesai" else "Belum Selesai")
 
-                        Switch(
-                            checked = habit.isDone,
-                            onCheckedChange = { newValue ->
+                        Row {
+
+                            Image(
+                                painter = painterResource(id = habit.imageRes),
+                                contentDescription = habit.nama,
+                                modifier = Modifier.size(60.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column {
+                                Text(
+                                    text = habit.nama,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = habit.deskripsi,
+                                    color = Color.LightGray
+                                )
+                                Text(
+                                    text = "Durasi: ${habit.durasi}",
+                                    color = Color.LightGray
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                if (habit.isDone) "Selesai" else "Belum Selesai",
+                                color = Color.White
+                            )
+
+                            Switch(
+                                checked = habit.isDone,
+                                onCheckedChange = { newValue ->
+                                    val updatedList = habits.toMutableList()
+                                    val realIndex = habits.indexOf(habit)
+                                    updatedList[realIndex] =
+                                        updatedList[realIndex].copy(isDone = newValue)
+                                    habits = updatedList
+                                }
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Button(
+                            onClick = {
                                 val updatedList = habits.toMutableList()
-                                updatedList[index] =
-                                    updatedList[index].copy(isDone = newValue)
+                                val realIndex = habits.indexOf(habit)
+                                updatedList[realIndex] =
+                                    updatedList[realIndex].copy(isDone = !habit.isDone)
                                 habits = updatedList
                             }
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Button(
-                        onClick = {
-                            val updatedList = habits.toMutableList()
-                            updatedList[index] =
-                                updatedList[index].copy(isDone = !habit.isDone)
-                            habits = updatedList
+                        ) {
+                            Text("Toggle Status")
                         }
-                    ) {
-                        Text("Toggle Status")
                     }
                 }
             }

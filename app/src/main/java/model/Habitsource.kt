@@ -17,8 +17,8 @@ object HabitSource {
         ),
         Habit(
             nama = "Tidur",
-            deskripsi = "Belajar coding",
-            durasi = "1 jam",
+            deskripsi = "Istirahat yang cukup",
+            durasi = "8 jam",
             imageRes = R.drawable.tidur
         )
     )
