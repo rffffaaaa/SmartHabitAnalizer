@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -13,7 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.graphics.Color
+import com.example.smarthabitanalizer.ui.theme.SmartHabitAnalizerTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -21,7 +20,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            SmartHabitUI()
+            SmartHabitAnalizerTheme {
+                SmartHabitUI()
+            }
         }
     }
 }
@@ -87,19 +88,16 @@ fun SmartHabitUI() {
 
             itemsIndexed(filteredHabits) { _, habit ->
 
-                val bgColor = if (habit.isDone) Color(0xFF1B5E20) else Color(0xFF2C2C2C)
-
                 Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 6.dp)
                 ) {
 
-                    Column(
-                        modifier = Modifier
-                            .background(bgColor)
-                            .padding(12.dp)
-                    ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
 
                         Row {
 
@@ -114,16 +112,16 @@ fun SmartHabitUI() {
                             Column {
                                 Text(
                                     text = habit.nama,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = Color.White
+                                    style = MaterialTheme.typography.titleMedium
                                 )
                                 Text(
                                     text = habit.deskripsi,
-                                    color = Color.LightGray
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
                                     text = "Durasi: ${habit.durasi}",
-                                    color = Color.LightGray
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
@@ -136,7 +134,7 @@ fun SmartHabitUI() {
                         ) {
                             Text(
                                 if (habit.isDone) "Selesai" else "Belum Selesai",
-                                color = Color.White
+                                style = MaterialTheme.typography.bodyMedium
                             )
 
                             Switch(
